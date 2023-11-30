@@ -2,7 +2,7 @@ syntax="proto3";
 
 package proto;
 
-option go_package = "github.com/go-related/portservice";
+option go_package = "./pb";
 
 service PortService {
   rpc CreateOrUpdatePorts (stream PortRequest) returns (PortResponse);

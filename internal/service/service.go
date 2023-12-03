@@ -33,7 +33,7 @@ func (svr *PortService) AddOrUpdatePorts(ctx context.Context, ports []domain.Por
 		return nil, err
 	}
 	svr.mx.Lock()
-	defer svr.mx.Lock()
+	defer svr.mx.Unlock()
 	var result []domain.Port
 	for _, port := range ports {
 		select {
@@ -56,7 +56,7 @@ func (svr *PortService) StartTransaction(ctx context.Context) error {
 		return nil
 	}
 	svr.mx.Lock()
-	defer svr.mx.Lock()
+	defer svr.mx.Unlock()
 	err := svr.repo.StartTransaction(ctx, true)
 	if err != nil {
 		logrus.WithError(err).Error("error starting transaction")
@@ -72,7 +72,7 @@ func (svr *PortService) CommitTransaction(ctx context.Context) error {
 		return err
 	}
 	svr.mx.Lock()
-	defer svr.mx.Lock()
+	defer svr.mx.Unlock()
 	err := svr.repo.CommitTransaction(ctx)
 	if err != nil {
 		logrus.WithError(err).Error("error comitting transaction")
@@ -83,7 +83,7 @@ func (svr *PortService) CommitTransaction(ctx context.Context) error {
 
 func (svr *PortService) AbortTransaction() error {
 	svr.mx.Lock()
-	defer svr.mx.Lock()
+	defer svr.mx.Unlock()
 	if svr.repo.DoesTransactionExists() {
 		svr.repo.AbortTransaction()
 	}

@@ -22,16 +22,50 @@ func TestInsertions_HappyPath(t *testing.T) {
 				},
 			},
 		},
+		"InsertTwoElements": {
+			ctx: context.TODO(),
+			inputListResult: []domain.Port{
+				{
+					Id: uuid.New().String(),
+				},
+				{
+					Id: uuid.New().String(),
+				},
+			},
+		},
+		"InsertFiveElements": {
+			ctx: context.TODO(),
+			inputListResult: []domain.Port{
+				{
+					Id: uuid.New().String(),
+				},
+				{
+					Id: uuid.New().String(),
+				},
+				{
+					Id: uuid.New().String(),
+				},
+				{
+					Id: uuid.New().String(),
+				},
+				{
+					Id: uuid.New().String(),
+				},
+			},
+		},
 	}
+
+	t.Parallel()
+
 	//arrange
 	mockRepository := new(MockRepository)
 	server := NewPortService(mockRepository)
-	t.Parallel()
-	mockRepository.On("StartTransaction", mock.AnythingOfType("*context.cancelCtx"), true).Return(nil)
-	mockRepository.On("CommitTransaction", mock.AnythingOfType("*context.cancelCtx")).Return(nil)
+	mockRepository.On("StartTransaction", mock.Anything, mock.Anything).Return(nil)
+	mockRepository.On("CommitTransaction", mock.Anything).Return(nil)
 	mockRepository.On("AbortTransaction").Return()
 	mockRepository.On("DoesTransactionExists").Return(true)
 	mockRepository.On("AddOrUpdatePort", mock.Anything, mock.AnythingOfType("domain.Port")).Return(domain.Port{}, nil)
+
 	for name, test := range testCases {
 		t.Run(name, func(t *testing.T) {
 			actualResult, err := server.AddOrUpdatePorts(test.ctx, test.inputListResult)
@@ -50,7 +84,7 @@ type MockRepository struct {
 // AddOrUpdatePort mocks the AddOrUpdatePort method.
 func (m *MockRepository) AddOrUpdatePort(ctx context.Context, item domain.Port) (domain.Port, error) {
 	args := m.Called(ctx, item)
-	return args.Get(0).(domain.Port), args.Error(1)
+	return item, args.Error(1)
 }
 
 // AbortTransaction mocks the AbortTransaction method.

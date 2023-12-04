@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/go-related/fileservice/internal/domain"
-	cerror "github.com/go-related/fileservice/internal/errors"
-	"github.com/go-related/fileservice/internal/ports"
+	"github.com/go-related/fileservice/internal/core/domain"
+	cerror "github.com/go-related/fileservice/internal/core/errors"
+	"github.com/go-related/fileservice/internal/core/ports"
 	"github.com/sirupsen/logrus"
 	"sync"
 )

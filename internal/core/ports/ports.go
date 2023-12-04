@@ -2,7 +2,7 @@ package ports
 
 import (
 	"context"
-	"github.com/go-related/fileservice/internal/domain"
+	"github.com/go-related/fileservice/internal/core/domain"
 )
 
 type SteamJsonParser interface {

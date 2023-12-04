@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/go-related/fileservice/internal/domain"
+	"github.com/go-related/fileservice/internal/core/domain"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

@@ -15,43 +15,20 @@ func TestInsertions_HappyPath(t *testing.T) {
 		inputListResult []domain.Port //for simplicity i have put them on the same place normally we would have a different properties
 	}{
 		"InsertOneElement": {
-			ctx: context.TODO(),
-			inputListResult: []domain.Port{
-				{
-					Id: uuid.New().String(),
-				},
-			},
+			ctx:             context.TODO(),
+			inputListResult: GeneratePortList(1),
 		},
-		"InsertTwoElements": {
-			ctx: context.TODO(),
-			inputListResult: []domain.Port{
-				{
-					Id: uuid.New().String(),
-				},
-				{
-					Id: uuid.New().String(),
-				},
-			},
+		"InsertTenElements": {
+			ctx:             context.TODO(),
+			inputListResult: GeneratePortList(10),
 		},
-		"InsertFiveElements": {
-			ctx: context.TODO(),
-			inputListResult: []domain.Port{
-				{
-					Id: uuid.New().String(),
-				},
-				{
-					Id: uuid.New().String(),
-				},
-				{
-					Id: uuid.New().String(),
-				},
-				{
-					Id: uuid.New().String(),
-				},
-				{
-					Id: uuid.New().String(),
-				},
-			},
+		"InsertOneHoundredElements": {
+			ctx:             context.TODO(),
+			inputListResult: GeneratePortList(100),
+		},
+		"InsertOneThousandElements": {
+			ctx:             context.TODO(),
+			inputListResult: GeneratePortList(1000),
 		},
 	}
 
@@ -77,6 +54,42 @@ func TestInsertions_HappyPath(t *testing.T) {
 	}
 }
 
+func TestRepositoryCalls(t *testing.T) {
+	// Arrange
+	mockRepository := new(MockRepository)
+	ctx := context.TODO()
+	server := NewPortService(mockRepository)
+	// not gonna get called since we return true from does transaction
+	mockRepository.On("StartTransaction", mock.Anything, mock.AnythingOfType("bool")).Return(nil).Maybe()
+	mockRepository.On("CommitTransaction", mock.Anything).Return(nil).Times(1)
+	mockRepository.On("DoesTransactionExists").Return(true).Times(3)
+	mockRepository.On("AddOrUpdatePort", mock.Anything, mock.AnythingOfType("domain.Port")).Return(domain.Port{}, nil).Times(1)
+
+	// Act
+	err := server.StartTransaction(ctx)
+	assert.NoError(t, err)
+	_, err = server.AddOrUpdatePorts(ctx, GeneratePortList(1))
+	assert.NoError(t, err)
+	err = server.CommitTransaction(ctx)
+	assert.NoError(t, err)
+	// Assert
+
+	mockRepository.AssertExpectations(t)
+}
+
+func GeneratePortList(length int) []domain.Port {
+	var result []domain.Port
+	for i := 0; i < length; i++ {
+		result = append(result, domain.Port{
+			Id:      uuid.New().String(),
+			Name:    uuid.New().String(),
+			City:    uuid.New().String(),
+			Country: uuid.New().String(),
+		})
+	}
+	return result
+}
+
 type MockRepository struct {
 	mock.Mock
 }
@@ -95,7 +108,8 @@ func (m *MockRepository) AbortTransaction() {
 // DoesTransactionExists mocks the DoesTransactionExists method.
 func (m *MockRepository) DoesTransactionExists() bool {
 	args := m.Called()
-	return args.Get(0).(bool)
+	result := args.Get(0).(bool)
+	return result
 }
 
 // StartTransaction mocks the StartTransaction method.

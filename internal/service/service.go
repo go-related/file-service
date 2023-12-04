@@ -60,9 +60,8 @@ func (svr *PortService) StartTransaction(ctx context.Context) error {
 	err := svr.repo.StartTransaction(ctx, true)
 	if err != nil {
 		logrus.WithError(err).Error("error starting transaction")
-		return err
 	}
-	return nil
+	return err
 }
 
 func (svr *PortService) CommitTransaction(ctx context.Context) error {

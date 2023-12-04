@@ -96,7 +96,7 @@ func (rp *PortInMemoryRepository) StartTransaction(ctx context.Context, canWrite
 	if rp.trn == nil { //otherwise we are inside a transaction
 		rp.trn = rp.db.Txn(canWrite)
 	} else {
-		return cerrors.TransactionAlreadyExistsError
+		return cerrors.TransactionAlreadyExists
 	}
 	return nil
 }

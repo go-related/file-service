@@ -9,23 +9,18 @@ service PortService {
 }
 
 message PortRequest {
-  map<string, PortDetails> port_details = 1;
+  string Id=1;
+  string name = 2;
+  string city = 3;
+  string country = 4;
+  repeated string alias = 5;
+  repeated string regions = 6;
+  repeated double coordinates = 7;
+  string province = 8;
+  string timezone = 9;
+  repeated string unlocs = 10;
+  string code = 11;
 }
-
-message PortDetails {
-  string name = 1;
-  string city = 2;
-  string country = 3;
-  repeated string alias = 4;
-  repeated string regions = 5;
-  repeated double coordinates = 6;
-  string province = 7;
-  string timezone = 8;
-  repeated string unlocs = 9;
-  string code = 10;
-}
-
-
 
 message PortResponse {
   // OK response indicating the operation was successful

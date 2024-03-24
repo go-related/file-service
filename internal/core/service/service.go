@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/go-related/fileservice/internal/domain"
-	cerror "github.com/go-related/fileservice/internal/errors"
-	"github.com/go-related/fileservice/internal/ports"
+	"github.com/go-related/fileservice/internal/core/domain"
+	cerror "github.com/go-related/fileservice/internal/core/errors"
+	"github.com/go-related/fileservice/internal/core/ports"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
@@ -75,7 +75,7 @@ func (svr *PortService) CommitTransaction(ctx context.Context) error {
 	defer svr.mx.Unlock()
 	err := svr.repo.CommitTransaction(ctx)
 	if err != nil {
-		logrus.WithError(err).Error("error comitting transaction")
+		logrus.WithError(err).Error("error committing transaction")
 		return err
 	}
 	return nil

@@ -2,16 +2,15 @@ package ports
 
 import (
 	"context"
-	"github.com/go-related/fileservice/internal/domain"
+	"github.com/go-related/fileservice/internal/core/domain"
 )
 
-type SteamJsonParser interface {
-	Subscribe() chan domain.Port
-	ReadJsonFile(ctx context.Context, filePath string) error
+type StreamJsonParser interface {
+	ReadJsonFile(ctx context.Context, filePath string, channel chan domain.Port) error
 }
 
 type Repository interface {
-	// AddOrUpdatePort now there are other ways to do a batch of them at the same time but for purposes of this, one by one should be ok
+	// AddOrUpdatePort maybe add a option to add a list together
 	AddOrUpdatePort(ctx context.Context, port domain.Port) (domain.Port, error)
 	StartTransaction(ctx context.Context, canWrite bool) error
 	DoesTransactionExists() bool
@@ -19,8 +18,8 @@ type Repository interface {
 	AbortTransaction()
 }
 
-type Service interface {
-	AddOrUpdatePorts(ctx context.Context, port []domain.Port) ([]domain.Port, error)
+type PortService interface {
+	AddOrUpdatePorts(ctx context.Context, ports []domain.Port) ([]domain.Port, error)
 	StartTransaction(ctx context.Context) error
 	CommitTransaction(ctx context.Context) error
 	AbortTransaction() error

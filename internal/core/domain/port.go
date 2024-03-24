@@ -5,8 +5,8 @@ type Port struct {
 	Name        string
 	City        string
 	Country     string
-	Alias       []string //since both of these are empty i am leaving
-	Regions     []string //same as above
+	Alias       []string
+	Regions     []string
 	Coordinates []float64
 	Province    string
 	Timezone    string

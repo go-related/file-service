@@ -31,7 +31,7 @@ func NewPortClient(host, port string, parser ports.StreamJsonParser) *PortsClien
 }
 
 func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	defer func() {
 		cancel()
 		fmt.Println("finished reading the file")
@@ -78,9 +78,6 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 
 	// start reading from file and send to the channel
 	err = cl.streamJsonParser.ReadJsonFile(ctx, filepath, cn)
-	if err != nil {
-		logrus.WithError(err).Error("error reading from file")
-	}
 
 	// setting up stream receiver
 	go func() {
@@ -91,19 +88,19 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 				if closeErr != nil {
 					logrus.WithError(closeErr).Error("error closing the stream")
 				}
-				return
 			default:
-				var response pb.PortResponse
-				err := stream.RecvMsg(response)
-				if err == io.EOF {
-					logrus.Info("connection closed from the server")
-				}
-				if err != nil {
-					logrus.WithError(err).WithField("response", response).Error("error received from the server")
-				}
-				logrus.WithField("response", response).Info("response received from the server")
 			}
+			var response pb.PortResponse
+			err := stream.RecvMsg(response)
+			if err == io.EOF {
+				logrus.Info("connection closed from the server")
+			}
+			if err != nil {
+				logrus.WithError(err).WithField("response", response).Error("error received from the server")
+			}
+			logrus.WithField("response", response).Info("response received from the server")
 		}
+
 	}()
 	return err
 }

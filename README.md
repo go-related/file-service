@@ -10,4 +10,13 @@ This will be a hexadecimal architecture implementation.
   ```shell 
   protoc --go_out=./proto --go-grpc_out=./proto proto/file.proto
     ```
-
+- To run server
+  ```shell
+  cd ~/projects/juligo/file-service
+  go run ./cmd/server/main.go
+  ```
+- To run server
+  ```shell
+  cd ~/projects/juligo/file-service
+  go run ./cmd/client/main.go
+  ```

@@ -36,7 +36,7 @@ func runClient() {
 		for scanner.Scan() {
 			input := strings.ToLower(scanner.Text())
 			if input == "c" {
-				fmt.Println("Cancellation requested. Press 'quit' to terminate.")
+				fmt.Println("Cancellation requested. terminating...")
 				c()
 			} else {
 				fmt.Println("Unknown command. Press 'c' to cancel or 'quit' to terminate.")

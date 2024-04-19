@@ -23,6 +23,7 @@ func NewPortServer(portService ports.PortService) *PortsServer {
 
 func (s *PortsServer) CreateOrUpdatePorts(stream pb.PortService_CreateOrUpdatePortsServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
+
 	defer func() {
 		err := s.portService.AbortTransaction()
 		if err != nil {
@@ -46,6 +47,7 @@ func (s *PortsServer) CreateOrUpdatePorts(stream pb.PortService_CreateOrUpdatePo
 		}
 
 		port, err := stream.Recv()
+		// handle the error
 		if err == io.EOF {
 			err := s.portService.CommitTransaction(ctx)
 			if err != nil {
@@ -57,6 +59,7 @@ func (s *PortsServer) CreateOrUpdatePorts(stream pb.PortService_CreateOrUpdatePo
 			} else {
 				msg = "operation completed successfully"
 			}
+			logrus.WithField("Failed Number", failedCount).Info("operation completed.")
 			return stream.SendAndClose(&pb.PortResponse{
 				FailedItemsNumber: &failedCount,
 				Message:           msg,

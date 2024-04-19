@@ -35,6 +35,7 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 	defer func() {
 		cancel()
 		fmt.Println("finished reading the file")
+
 	}()
 
 	cn := make(chan domain.Port)
@@ -102,5 +103,10 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 		}
 
 	}()
+	closeError := stream.CloseSend()
+	if err != nil {
+		logrus.WithError(closeError).Error("failed to close send")
+		return closeError
+	}
 	return err
 }

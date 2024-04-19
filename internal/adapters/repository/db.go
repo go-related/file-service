@@ -23,23 +23,23 @@ type PortInMemoryRepository struct {
 	db  *memdb.MemDB
 }
 
-func (rp *PortInMemoryRepository) AddOrUpdatePort(ctx context.Context, port domain.Port) error {
+func (rp *PortInMemoryRepository) AddOrUpdatePort(ctx context.Context, port domain.Port) (*domain.Port, error) {
 	if rp.trn == nil { // Here maybe we can use Guards to check
 		err := fmt.Errorf("please strart a transaction before countinuing") // maybe this needs to be a custom error
 		logrus.Error(err)
-		return err
+		return nil, err
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	currentData, err := rp.GetById(ctx, port.Id)
 	if err != nil {
 		logrus.WithField("id", port.Id).WithError(err).Error("error loading port from db")
-		return err
+		return nil, err
 	}
 	// check if we have any cancellation before continuing
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return nil, ctx.Err()
 	default:
 	}
 	// here is the same code but i left intentionally to distinguish btw insert and update
@@ -54,7 +54,7 @@ func (rp *PortInMemoryRepository) AddOrUpdatePort(ctx context.Context, port doma
 			logrus.WithError(err).Error("error updating data into table")
 		}
 	}
-	return err
+	return currentData, err
 }
 
 func (rp *PortInMemoryRepository) GetById(ctx context.Context, Id string) (*domain.Port, error) {

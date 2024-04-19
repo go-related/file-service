@@ -3,7 +3,8 @@ module github.com/go-related/fileservice
 go 1.20
 
 require (
-	github.com/google/uuid v1.4.0
+	github.com/bcicen/jstream v1.0.1
+	github.com/hashicorp/go-memdb v1.3.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.59.0
@@ -11,11 +12,9 @@ require (
 )
 
 require (
-	github.com/bcicen/jstream v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
-	github.com/hashicorp/go-memdb v1.3.4 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect

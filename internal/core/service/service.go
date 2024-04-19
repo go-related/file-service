@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/go-related/fileservice/internal/core/domain"
 	cerror "github.com/go-related/fileservice/internal/core/errors"
 	"github.com/go-related/fileservice/internal/core/ports"
@@ -19,7 +18,7 @@ func NewPortService(repo ports.Repository) *PortService {
 	return &PortService{sync.Mutex{}, repo}
 }
 
-func (svr *PortService) AddOrUpdatePorts(ctx context.Context, ports []domain.Port) ([]domain.Port, error) {
+func (svr *PortService) AddOrUpdatePorts(ctx context.Context, ports []domain.Port) ([]*domain.Port, error) {
 	if len(ports) == 0 {
 		err := cerror.InvalidPortsInputs
 		logrus.WithError(err).Error("invalid input")
@@ -27,14 +26,9 @@ func (svr *PortService) AddOrUpdatePorts(ctx context.Context, ports []domain.Por
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	err := svr.StartTransaction(ctx)
-	if err != nil {
-		logrus.WithError(err).Error("error starting transaction")
-		return nil, err
-	}
 	svr.mx.Lock()
 	defer svr.mx.Unlock()
-	var result []domain.Port
+	var result []*domain.Port
 	for _, port := range ports {
 		select {
 		case <-ctx.Done():
@@ -52,12 +46,9 @@ func (svr *PortService) AddOrUpdatePorts(ctx context.Context, ports []domain.Por
 }
 
 func (svr *PortService) StartTransaction(ctx context.Context) error {
-	if svr.repo.DoesTransactionExists() {
-		return nil
-	}
 	svr.mx.Lock()
 	defer svr.mx.Unlock()
-	err := svr.repo.StartTransaction(ctx, true)
+	err := svr.repo.StartTransaction(ctx)
 	if err != nil {
 		logrus.WithError(err).Error("error starting transaction")
 		return err
@@ -66,11 +57,6 @@ func (svr *PortService) StartTransaction(ctx context.Context) error {
 }
 
 func (svr *PortService) CommitTransaction(ctx context.Context) error {
-	if !svr.repo.DoesTransactionExists() {
-		err := errors.New("transaction not initiated, can't commit transaction")
-		logrus.WithError(err)
-		return err
-	}
 	svr.mx.Lock()
 	defer svr.mx.Unlock()
 	err := svr.repo.CommitTransaction(ctx)
@@ -84,8 +70,6 @@ func (svr *PortService) CommitTransaction(ctx context.Context) error {
 func (svr *PortService) AbortTransaction() error {
 	svr.mx.Lock()
 	defer svr.mx.Unlock()
-	if svr.repo.DoesTransactionExists() {
-		svr.repo.AbortTransaction()
-	}
+	svr.repo.AbortTransaction()
 	return nil
 }

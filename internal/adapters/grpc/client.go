@@ -32,7 +32,10 @@ func NewPortClient(host, port string, parser ports.StreamJsonParser) *PortsClien
 
 func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel() // Ensure cancellation is called when main function exits
+	defer func() {
+		cancel()
+		fmt.Println("finished reading the file")
+	}()
 
 	cn := make(chan domain.Port)
 	stream, err := cl.client.CreateOrUpdatePorts(ctx)
@@ -40,7 +43,7 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 		return err
 	}
 
-	// set up sender
+	// set up channel reader and stream sender
 	go func() {
 		for {
 			select {
@@ -73,6 +76,7 @@ func (cl *PortsClient) ReadJsonFile(ctx context.Context, filepath string) error 
 		}
 	}()
 
+	// start reading from file and send to the channel
 	err = cl.streamJsonParser.ReadJsonFile(ctx, filepath, cn)
 	if err != nil {
 		logrus.WithError(err).Error("error reading from file")

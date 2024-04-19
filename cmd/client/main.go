@@ -26,12 +26,7 @@ func main() {
 func runClient() {
 	server := igrpc.NewPortClient(config.host, config.port, streamJsonParser)
 	ctx, cancel := context.WithCancel(context.Background())
-
-	fmt.Println("started to read from file")
-	err := server.ReadJsonFile(ctx, config.filePath)
-	if err != nil {
-		logrus.WithError(err).Error("")
-	}
+	defer cancel()
 
 	// Start a goroutine to listen for user input
 	fmt.Println("Press 'c' to cancel or 'quit' to terminate")
@@ -49,7 +44,12 @@ func runClient() {
 		}
 	}(cancel)
 
-	defer cancel()
+	fmt.Println("started to read from file")
+	err := server.ReadJsonFile(ctx, config.filePath)
+	if err != nil {
+		logrus.WithError(err).Error("error reading json file")
+	}
+
 	fmt.Println("Program terminated.")
 }
 

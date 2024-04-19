@@ -6,6 +6,7 @@ import (
 	"github.com/go-related/fileservice/internal/core/domain"
 	"github.com/go-related/fileservice/internal/core/ports"
 	"github.com/go-related/fileservice/proto/pb"
+	"github.com/sirupsen/logrus"
 	"io"
 )
 
@@ -22,13 +23,28 @@ func NewPortServer(portService ports.PortService) *PortsServer {
 
 func (s *PortsServer) CreateOrUpdatePorts(stream pb.PortService_CreateOrUpdatePortsServer) error {
 	ctx, cancel := context.WithCancel(stream.Context())
-	defer cancel()
+	defer func() {
+		err := s.portService.AbortTransaction()
+		if err != nil {
+			logrus.WithError(err).Warn("aborting transaction.")
+		}
+		cancel()
+	}()
+
 	err := s.portService.StartTransaction(ctx)
 	if err != nil {
 		return err
 	}
 	var failedCount int64
 	for {
+		// check if we have any cancellation before continuing
+		select {
+		case <-ctx.Done():
+			err = s.portService.AbortTransaction()
+			return ctx.Err()
+		default:
+		}
+
 		port, err := stream.Recv()
 		if err == io.EOF {
 			err := s.portService.CommitTransaction(ctx)
@@ -59,13 +75,6 @@ func (s *PortsServer) CreateOrUpdatePorts(stream pb.PortService_CreateOrUpdatePo
 			if len(insertedItems) != len(reqItems) {
 				failedCount += int64(len(reqItems) - len(insertedItems))
 			}
-		}
-		// check if we have any cancellation before continuing
-		select {
-		case <-ctx.Done():
-			err = s.portService.AbortTransaction()
-			return ctx.Err()
-		default:
 		}
 	}
 }

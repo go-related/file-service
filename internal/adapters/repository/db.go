@@ -102,6 +102,9 @@ func (rp *PortInMemoryRepository) StartTransaction(ctx context.Context) error {
 
 // CommitTransaction i would have prefered to pass a context to the commit so i would be able to cancel or timeout this operation in case it takes a long time
 func (rp *PortInMemoryRepository) CommitTransaction(ctx context.Context) error {
+	if rp.trn == nil {
+		return nil // TODO return proper error
+	}
 	// check if we have any cancellation before continuing
 	select {
 	case <-ctx.Done():
@@ -114,6 +117,9 @@ func (rp *PortInMemoryRepository) CommitTransaction(ctx context.Context) error {
 }
 
 func (rp *PortInMemoryRepository) AbortTransaction() {
+	if rp.trn == nil {
+		return // TODO return proper error
+	}
 	rp.trn.Abort()
 	rp.trn = nil // same as in the commit
 }
